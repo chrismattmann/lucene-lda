@@ -44,18 +44,18 @@ public class SimpleIndexer {
 		
 		// TODO: is this the best place for this?
 		// Read file code files into the hashmap
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new FileReader(fileCodeFileName));
-			String line = null;
-			while ((line = br.readLine()) != null) {
-				String[] values = line.split(",\\s*");
-				fileCodes.put(values[1], Integer.parseInt(values[0]));
-			}
-		} catch (Exception e){
-			e.printStackTrace();
-			return;
-		}
+//		BufferedReader br = null;
+//		try {
+//			br = new BufferedReader(new FileReader(fileCodeFileName));
+//			String line = null;
+//			while ((line = br.readLine()) != null) {
+//				String[] values = line.split(",\\s*");
+//				fileCodes.put(values[1], Integer.parseInt(values[0]));
+//			}
+//		} catch (Exception e){
+//			e.printStackTrace();
+//			return;
+//		}
 
 		indexDirectory(writer, inDir, lda);
 		writer.close();
@@ -95,14 +95,17 @@ public class SimpleIndexer {
 		logger.debug("Indexing file " + f.getName());
 		
 		Document doc = new Document();
-		doc.add(new Field("file", fileCodes.get(f.getName()).toString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+//		doc.add(new Field("file", fileCodes.get(f.getName()).toString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+        doc.add(new Field("file", f.getName(), Field.Store.YES, Field.Index.NOT_ANALYZED));
 
-		// Add content of file
+
+        // Add content of file
 		String data = FileUtils.readFileToString(f);
 		data = data.replaceAll("\\n", " ");
 		doc.add(new Field("data", data, Field.Store.YES, Field.Index.ANALYZED));
 
-		// Add LDA topic memberships as one big string: the row of this document in the theta matrix
+
+        // Add LDA topic memberships as one big string: the row of this document in the theta matrix
 		for (int i = 0; i < lda.scens.size(); ++i){
 			int docId = lda.scens.get(i).fileMap.get(f.getName());
 			doc.add(new Field("topics" + lda.scens.get(i).K, lda.encodeTopics(docId, lda.scens.get(i).K), Store.YES, Index.NOT_ANALYZED));
